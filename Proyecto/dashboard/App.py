@@ -5,10 +5,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.ensemble import RandomForestClassifier
 
-# --- 1. CONFIGURACIÓN DE LA PÁGINA ---
+# --- 1. CONFIGURACION DE LA PAGINA ---
 st.set_page_config(page_title="Observatorio de Movilidad y Educación", page_icon="🚦", layout="wide")
 
-# --- 2. CARGA DE DATOS Y ENTRENAMIENTO DE MODELO (CACHÉ) ---
+# --- 2. CARGA DE DATOS Y ENTRENAMIENTO DE MODELO (CACHE) ---
 @st.cache_data
 def cargar_datos():
     # 1. Datos Universidad
@@ -42,28 +42,28 @@ df_univ, df_vel, df_tiempo, df_pasajeros = cargar_datos()
 modelo_rf, features_modelo = entrenar_modelo(df_univ)
 
 # --- 3. ENCABEZADO ---
-st.title("🚦 Observatorio de Movilidad y Rendimiento Académico")
-st.markdown("Plataforma interactiva para la toma de decisiones basada en datos abiertos y encuestas universitarias en el corredor Bogotá-Soacha.")
+st.title("Observatorio de movilidad y rendimiento academico")
+st.markdown("Plataforma interactiva para la toma de decisiones basada en datos abiertos y encuestas universitarias en el corredor Bogota-Soacha.")
 
-# --- 4. CREACIÓN DE PESTAÑAS ---
-tab1, tab2, tab3 = st.tabs(["🏙️ Contexto Ciudad (Movilidad)", "🎓 Impacto Estudiantil", "🤖 Simulador Predictivo AI"])
+# --- 4. CREACION DE PESTAÑAS ---
+tab1, tab2, tab3 = st.tabs(["Contexto Ciudad (Movilidad)", "Impacto estudiantil", "Simulador predictivo AI"])
 
 # ==========================================
 # PESTAÑA 1: CONTEXTO CIUDAD
 # ==========================================
 with tab1:
-    st.header("Análisis de la Infraestructura Urbana")
+    st.header("Analisis de la Infraestructura Urbana")
     
     # --- KPIs PRINCIPALES ---
     kpi_c1, kpi_c2, kpi_c3 = st.columns(3)
     total_pasajeros_dia = df_pasajeros['pasajeros_dia_tipico_laboral'].max()
-    kpi_c1.metric("Volumen Diario (Bogotá/Soacha)", f"{total_pasajeros_dia:,.0f}".replace(',', '.'))
+    kpi_c1.metric("Volumen Diario (Bogota/Soacha)", f"{total_pasajeros_dia:,.0f}".replace(',', '.'))
     
     vel_actual = df_tiempo[df_tiempo['ano'] == 2025]['velocidad_km/h'].values[0]
-    kpi_c2.metric("Velocidad Vial Actual", f"{vel_actual:.1f} km/h")
+    kpi_c2.metric("Velocidad vial actual", f"{vel_actual:.1f} km/h")
     
     df_sitp = pd.read_csv('../datos_limpios/validacion_SITP.csv')
-    kpi_c3.metric("Validaciones Registradas (Soacha)", f"{len(df_sitp):,.0f}".replace(',', '.'))
+    kpi_c3.metric("Validaciones registradas (Soacha)", f"{len(df_sitp):,.0f}".replace(',', '.'))
     
     st.divider()
 
@@ -72,8 +72,8 @@ with tab1:
     
     with col_c1:
         # ==========================================
-        st.subheader("Caída Histórica de la Velocidad")
-        st.markdown("Evolución del tráfico vehicular en las últimas dos décadas sin duplicados.")
+        st.subheader("Caída historica de la velocidad")
+        st.markdown("Evolución del trafico vehicular en las ultimas dos decadas sin duplicados.")
 
         # 1. Extraer y renombrar columnas
         hist_vel = df_vel[['ano', 'velocidad_promedio_km/h']].rename(columns={'velocidad_promedio_km/h': 'Velocidad'})
@@ -82,12 +82,12 @@ with tab1:
         # 2. Combinar los conjuntos de datos
         df_vel_total = pd.concat([hist_vel, rec_vel])
 
-        # 3. SOLUCIÓN CRÍTICA: Eliminar duplicados de años, asegurar tipo entero y ordenar
+        # 3. SOLUCION CRITICA: Eliminar duplicados de años, asegurar tipo entero y ordenar
         df_vel_total = df_vel_total.drop_duplicates(subset=['ano'], keep='last')
         df_vel_total['ano'] = df_vel_total['ano'].astype(int)
         df_vel_total = df_vel_total.sort_values('ano')
 
-        # 4. Crear el gráfico configurando de forma explícita el eje X como lineal continuo
+        # 4. Crear el grafico configurando de forma explicita el eje X como lineal continuo
         fig_vel = px.line(df_vel_total, x='ano', y='Velocidad', markers=True)
 
         # Ajustes de diseño para que se vea limpio, espaciado y profesional
@@ -105,10 +105,10 @@ with tab1:
         st.plotly_chart(fig_vel, use_container_width=True)
         
     with col_c2:
-        st.subheader("Carga del Sistema de Transporte")
+        st.subheader("Carga del sistema de transporte")
         st.markdown("Distribución diaria de los 3.9 millones de pasajeros.")
         
-        # Procesamos pasajeros_dia para sacar Troncal vs Zonal
+        # Procesamos pasajeros_dia para sacar troncal vs zonal
         valores_unicos = df_pasajeros['pasajeros_dia_tipico_laboral'].unique()
         valores_unicos.sort() # Ordenar de menor a mayor: [1426622, 2517676, 3944298]
         
@@ -118,7 +118,7 @@ with tab1:
                 'Pasajeros': [valores_unicos[0], valores_unicos[1]]
             })
             
-            # Gráfico de Donas (Donut chart)
+            # Grafico de Donas (Donut chart)
             fig_comp = px.pie(datos_comp, names='Componente', values='Pasajeros', hole=0.5,
                               color_discrete_sequence=['#1f77b4', '#d62728']) # Azul SITP y Rojo TM
             
@@ -131,8 +131,8 @@ with tab1:
     st.divider()
 
     # --- FILA 2: MICRO CONTEXTO SOACHA (Cuellos de Botella) ---
-    st.subheader("Presión del Sistema (Cuellos de Botella en Soacha)")
-    st.markdown("Volumen de validaciones reales por estación y punto de acceso.")
+    st.subheader("Presion del sistema (Cuellos de botella en Soacha)")
+    st.markdown("Volumen de validaciones reales por estacion y punto de acceso.")
     
     congest_estacion = df_sitp.groupby(['estacion_parada', 'acceso_estacion']).size().reset_index(name='cantidad')
     congest_estacion = congest_estacion.sort_values(by='cantidad', ascending=False)
@@ -154,27 +154,27 @@ with tab1:
 # PESTAÑA 2: IMPACTO ESTUDIANTIL
 # ==========================================
 with tab2:
-    st.header("Realidad Universitaria")
+    st.header("Realidad universitaria")
     
     # KPIs rápidos
-    st.markdown("#### 📊 Indicadores Clave")
+    st.markdown("#### 📊 Indicadores clave")
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
-    kpi1.metric("Promedio Horas Viaje/Semana", f"{df_univ['horas_viaje_semanal'].mean():.1f} h")
-    kpi2.metric("Llegadas Tarde Promedio", f"{df_univ['llegadas_tarde'].mean():.1f}")
-    kpi3.metric("Clases Perdidas Promedio", f"{df_univ['pierde_clase'].mean():.1f}")
+    kpi1.metric("Promedio horas viaje/semana", f"{df_univ['horas_viaje_semanal'].mean():.1f} h")
+    kpi2.metric("Llegadas tarde promedio", f"{df_univ['llegadas_tarde'].mean():.1f}")
+    kpi3.metric("Clases perdidas promedio", f"{df_univ['pierde_clase'].mean():.1f}")
     porc_riesgo = (df_univ['riesgo_academico'].sum() / len(df_univ)) * 100
-    kpi4.metric("Estudiantes en Riesgo Alto", f"{porc_riesgo:.1f}%", delta="Crítico", delta_color="inverse")
+    kpi4.metric("Estudiantes en riesgo alto", f"{porc_riesgo:.1f}%", delta="Crítico", delta_color="inverse")
     
     st.divider()
     
     col_e1, col_e2 = st.columns(2)
     with col_e1:
-        st.markdown("**Distribución por Medio de Transporte**")
+        st.markdown("**Distribucion por medio de transporte**")
         fig_trans = px.pie(df_univ, names='medio_transporte', hole=0.4, color_discrete_sequence=px.colors.qualitative.Pastel)
         st.plotly_chart(fig_trans, use_container_width=True)
         
     with col_e2:
-        st.markdown("**Tiempo de Viaje vs Clases Perdidas**")
+        st.markdown("**Tiempo de viaje vs clases perdidas**")
         fig_box = px.box(df_univ, x='tiempo_llegada', y='pierde_clase', color='tiempo_llegada',
                          category_orders={"tiempo_llegada": ['0-30 min', '30-60 min', '61-90 min', '91-120 min', 'Mas de 120 min']})
         st.plotly_chart(fig_box, use_container_width=True)
@@ -183,7 +183,7 @@ with tab2:
 # PESTAÑA 3: SIMULADOR DE RIESGO (MACHINE LEARNING)
 # ==========================================
 with tab3:
-    st.header("🤖 Simulador Predictivo de Riesgo Académico")
+    st.header("Simulador predictivo de riesgo academico")
     st.markdown("""
     Esta herramienta utiliza un modelo de **Random Forest Classifier** entrenado con los datos de la encuesta. 
     Ajusta los parámetros de movilidad de un estudiante hipotético para estimar la probabilidad de que empiece a faltar a clases o baje su promedio.
@@ -194,17 +194,17 @@ with tab3:
     col_sim1, col_sim2 = st.columns([1, 1])
     
     with col_sim1:
-        st.subheader("Parámetros del Estudiante")
-        sim_minutos = st.slider("Minutos de viaje (Solo Ida)", min_value=10, max_value=180, value=75, step=5)
-        sim_trasbordos = st.slider("Cantidad de Trasbordos (Ida)", min_value=0, max_value=4, value=1)
+        st.subheader("Parametros del estudiante")
+        sim_minutos = st.slider("Minutos de viaje (Solo ida)", min_value=10, max_value=180, value=75, step=5)
+        sim_trasbordos = st.slider("Cantidad de trasbordos (Ida)", min_value=0, max_value=4, value=1)
         sim_dias = st.slider("Días de asistencia a la semana", min_value=1, max_value=6, value=5)
         
-        # Cálculo automático de horas semanales basado en los inputs
+        # Calculo automatico de horas semanales basado en los inputs
         sim_horas_semana = ((sim_minutos * 2) * sim_dias) / 60
-        st.info(f"⏳ Tiempo total invertido a la semana: **{sim_horas_semana:.1f} horas**")
+        st.info(f"Tiempo total invertido a la semana: **{sim_horas_semana:.1f} horas**")
         
     with col_sim2:
-        st.subheader("Predicción del Modelo")
+        st.subheader("Prediccion del modelo")
         
         # Crear array con los datos del usuario
         input_data = pd.DataFrame([[sim_minutos, sim_trasbordos, sim_horas_semana, sim_dias]], columns=features_modelo)
@@ -212,13 +212,13 @@ with tab3:
         # Predecir probabilidad
         probabilidad = modelo_rf.predict_proba(input_data)[0][1] * 100
         
-        # Gráfico tipo Velocímetro (Gauge)
+        # Grafico tipo velocimetro
         fig_gauge = go.Figure(go.Indicator(
             mode = "gauge+number",
             value = probabilidad,
             number = {'suffix': "%"},
             domain = {'x': [0, 1], 'y': [0, 1]},
-            title = {'text': "Probabilidad de Riesgo Académico", 'font': {'size': 20}},
+            title = {'text': "Probabilidad de riesgo academico", 'font': {'size': 20}},
             gauge = {
                 'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
                 'bar': {'color': "rgba(0,0,0,0)"},
@@ -238,11 +238,11 @@ with tab3:
         st.plotly_chart(fig_gauge, use_container_width=True)
         
         if probabilidad < 33:
-            st.success("✅ Estudiante en zona segura. El impacto logístico es manejable.")
+            st.success("Estudiante en zona segura. El impacto logistico es manejable.")
         elif probabilidad < 66:
-            st.warning("⚠️ Riesgo moderado. El estudiante podría empezar a experimentar fatiga y fallas esporádicas.")
+            st.warning("Riesgo moderado. El estudiante podria empezar a experimentar fatiga y fallas esporadicas.")
         else:
-            st.error("🚨 Riesgo Crítico. Alta probabilidad de inasistencia recurrente o caída en el promedio. Se sugieren medidas de apoyo.")
+            st.error("Riesgo critico. Alta probabilidad de inasistencia recurrente o caida en el promedio. Se sugieren medidas de apoyo.")
 
 # --- FOOTER ---
 st.divider()
